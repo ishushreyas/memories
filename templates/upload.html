@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload – {{.BucketName}}</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-black via-neutral-900 to-black text-white font-sans">
+  <div class="max-w-lg mx-auto px-4 sm:px-6 py-10 sm:py-16">
+
+    <div class="flex items-center gap-3 mb-8">
+      <a href="/"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md shadow-lg transition">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        <span class="hidden sm:inline text-sm">Back</span>
+      </a>
+      <h1 class="text-xl sm:text-2xl font-semibold tracking-tight flex-1 text-center sm:text-left">
+        Upload to <span class="text-white/80">{{.BucketName}}</span>
+      </h1>
+    </div>
+
+    <div class="rounded-2xl bg-white/5 backdrop-blur-xl shadow-xl p-6 sm:p-8 border border-white/10">
+      <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        
+        <div>
+          <label class="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Folder Name (Optional)</label>
+          <div class="relative">
+            <i data-lucide="folder" class="absolute left-3 top-2.5 w-5 h-5 text-white/50"></i>
+            <input type="text" name="folder" placeholder="e.g. photos/vacation"
+                   class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 focus:bg-black/60 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">Select File</label>
+          <input type="file" name="file" id="fileInput" required
+                 class="w-full text-sm text-white 
+                        file:mr-4 file:py-2.5 file:px-4 
+                        file:rounded-xl file:border-0 file:text-xs file:font-bold file:uppercase
+                        file:bg-white file:text-black hover:file:bg-gray-200
+                        bg-black/40 rounded-xl border border-white/10 cursor-pointer transition">
+        </div>
+
+        <div>
+            <label class="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">File Name</label>
+            <div class="relative">
+              <i data-lucide="file-edit" class="absolute left-3 top-2.5 w-5 h-5 text-white/50"></i>
+              <input type="text" name="custom_name" id="fileNameInput" placeholder="Select a file first..."
+                     class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 focus:bg-black/60 transition">
+            </div>
+        </div>
+
+        <div class="h-px bg-white/10 my-2"></div>
+
+        <button type="submit"
+                class="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl
+                       bg-white hover:bg-neutral-200 text-black font-bold tracking-wide
+                       shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          Start Upload
+        </button>
+      </form>
+
+      {{if .Message}}
+      <div class="mt-6 p-4 rounded-xl bg-green-500/20 border border-green-500/30 text-center">
+          <p class="text-sm text-green-200 font-medium">{{.Message}}</p>
+      </div>
+      {{end}}
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Auto-fill filename input when file is selected
+    const fileInput = document.getElementById('fileInput');
+    const nameInput = document.getElementById('fileNameInput');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            nameInput.value = this.files[0].name;
+        }
+    });
+  </script>
+</body>
+</html>

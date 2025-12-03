@@ -1,0 +1,40 @@
+{{define "title"}}Login{{end}}
+{{template "layout.html" .}}
+
+{{define "content"}}
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit" class="btn">Login</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "{{.FirebaseApiKey}}",
+      authDomain: "{{.FirebaseAuthDomain}}",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const pass = document.getElementById("password").value;
+
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, email, pass);
+        const idToken = await userCred.user.getIdToken();
+
+        // Send token to backend via cookie
+        document.cookie = "session=" + idToken + "; path=/";
+        window.location.href = "/";
+      } catch (err) {
+        alert("Login failed: " + err.message);
+      }
+    });
+  </script>
+{{end}}

@@ -1,0 +1,185 @@
+{{define "view.html"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>{{.FileName}}</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          animation: {
+            'spin-slow': 'spin 3s linear infinite',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar for PDF Frame */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+    
+    /* PDF Embed Styling */
+    .pdf-frame { height: calc(100vh - 80px); }
+    
+    /* Audio Visualizer Animation */
+    .bar {
+      width: 4px; height: 20px; background: currentColor; border-radius: 2px;
+      animation: sound 0ms -800ms linear infinite alternate;
+    }
+    @keyframes sound { 0% { height: 6px; opacity: 0.5; } 100% { height: 28px; opacity: 1; } }
+    .playing .bar { animation-duration: 400ms; }
+    .paused .bar { animation-play-state: paused; height: 6px; }
+
+    /* Glass Effect */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-panel {
+      background: rgba(20, 20, 22, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white transition-colors duration-300 h-screen w-screen overflow-hidden relative selection:bg-blue-500 selection:text-white">
+
+  <nav class="absolute top-0 left-0 right-0 z-50 p-4 flex justify-between items-start pointer-events-none">
+    
+    <div class="glass-panel px-4 py-2 rounded-2xl shadow-lg pointer-events-auto flex items-center gap-3 max-w-[70vw]">
+      <button onclick="window.history.back()" class="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </button>
+      <div class="border-l border-gray-300 dark:border-gray-700 h-6 mx-1"></div>
+      <div class="overflow-hidden">
+        <h1 class="text-sm font-semibold truncate">{{.FileName}}</h1>
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{{.FileSize}} &bull; {{.ContentType}}</p>
+      </div>
+    </div>
+
+    <div class="flex gap-2 pointer-events-auto">
+      <a href="/download/{{.FileName}}" class="glass-panel p-2.5 rounded-full shadow-lg hover:scale-105 active:scale-95 transition text-blue-600 dark:text-blue-400" title="Download">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+      </a>
+      <button id="themeToggle" class="glass-panel p-2.5 rounded-full shadow-lg hover:scale-105 active:scale-95 transition text-yellow-500 dark:text-gray-300">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main class="w-full h-full flex items-center justify-center p-4 pt-20">
+
+    {{if .IsImage}}
+      <img src="/view/{{.FileName}}?raw=true" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-fade-in" alt="{{.FileName}}">
+
+    {{else if .IsVideo}}
+      <div class="max-w-full max-h-full rounded-2xl overflow-hidden shadow-2xl bg-black animate-fade-in">
+        <video controls autoplay class="w-full h-full">
+          <source src="/view/{{.FileName}}?raw=true" type="{{.ContentType}}">
+        </video>
+      </div>
+
+    {{else if .IsPDF}}
+      <div class="w-full max-w-6xl h-full glass-panel rounded-2xl p-1 shadow-2xl animate-fade-in flex flex-col">
+        <object data="/view/{{.FileName}}?raw=true" type="application/pdf" class="w-full h-full rounded-xl">
+            <div class="flex flex-col items-center justify-center h-full text-center p-6">
+                <svg class="w-16 h-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                <p class="text-lg font-semibold">PDF Preview Not Supported</p>
+                <a href="/download/{{.FileName}}" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg">Download PDF</a>
+            </div>
+        </object>
+      </div>
+
+    {{else if (hasPrefix .ContentType "audio/")}}
+      <div class="glass-panel p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center animate-fade-in paused" id="audioContainer">
+        
+        <div class="w-32 h-32 mx-auto bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full shadow-lg mb-6 flex items-center justify-center relative overflow-hidden">
+            <svg class="w-12 h-12 text-white/80 absolute z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v11M5 19a2 2 0 100-4 2 2 0 000 4z" /></svg>
+            <div class="absolute inset-0 border-4 border-white/20 rounded-full border-t-white/60 animate-spin-slow"></div>
+        </div>
+
+        <h2 class="text-xl font-bold truncate mb-1">{{.FileName}}</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 font-mono mb-6 uppercase tracking-wider">Audio File</p>
+
+        <div class="flex justify-center items-end gap-1 h-8 mb-6 text-blue-500">
+            <div class="bar" style="animation-delay: -0.2s"></div>
+            <div class="bar" style="animation-delay: -0.4s"></div>
+            <div class="bar" style="animation-delay: -0.6s"></div>
+            <div class="bar" style="animation-delay: -0.8s"></div>
+            <div class="bar" style="animation-delay: -1.0s"></div>
+        </div>
+
+        <audio id="audioPlayer" controls class="w-full">
+          <source src="/view/{{.FileName}}?raw=true" type="{{.ContentType}}">
+        </audio>
+      </div>
+
+    {{else}}
+      <div class="glass-panel p-10 rounded-3xl shadow-2xl text-center max-w-sm animate-fade-in">
+        <div class="w-20 h-20 mx-auto bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mb-4">
+            <svg class="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        </div>
+        <h3 class="text-lg font-bold mb-2 break-all">{{.FileName}}</h3>
+        <p class="text-sm text-gray-500 mb-6">Preview not available</p>
+        <a href="/download/{{.FileName}}" class="block w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-500/30">
+            Download File
+        </a>
+      </div>
+    {{end}}
+
+  </main>
+
+  <script>
+    // --- Dark Mode Logic ---
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeToggle');
+    
+    function initTheme() {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+    }
+    initTheme();
+
+    themeBtn.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+    });
+
+    // --- Audio Animation Logic ---
+    const audioPlayer = document.getElementById('audioPlayer');
+    const audioContainer = document.getElementById('audioContainer');
+
+    if (audioPlayer && audioContainer) {
+        audioPlayer.addEventListener('play', () => {
+            audioContainer.classList.remove('paused');
+            audioContainer.classList.add('playing');
+        });
+        audioPlayer.addEventListener('pause', () => {
+            audioContainer.classList.remove('playing');
+            audioContainer.classList.add('paused');
+        });
+        audioPlayer.addEventListener('ended', () => {
+            audioContainer.classList.remove('playing');
+            audioContainer.classList.add('paused');
+        });
+    }
+  </script>
+</body>
+</html>
+{{end}}
