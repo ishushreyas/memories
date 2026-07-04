@@ -1,10 +1,11 @@
+
 {{define "view.html"}}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>{{.FileName}}</title>
+  <title>{{.FileName}} - Viewer</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -86,6 +87,13 @@
             <source src="/view/{{.FileName}}?raw=true" type="{{.ContentType}}" />
         </video>
       </div>
+      
+    {{else if .IsAudio}}
+      <div class="w-full max-w-5xl">
+        <audio id="player" playsinline controls data-poster="">
+            <source src="/view/{{.FileName}}?raw=true" type="{{.ContentType}}" />
+        </audio>
+      </div>
 
     {{else if .IsPDF}}
       <div class="w-full h-full pt-16">
@@ -147,3 +155,5 @@
 </body>
 </html>
 {{end}}
+
+

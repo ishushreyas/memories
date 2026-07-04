@@ -1,13 +1,19 @@
+
+{{define "index.html"}}
 <!DOCTYPE html>
 <html lang="en" class="antialiased">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{{.BucketName}} - Cloud Manager</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -18,174 +24,192 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a',
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a',
                         },
                         dark: {
                             bg: '#0f0f11', card: '#18181b', border: '#27272a'
                         }
                     },
-                    animation: { 'fade-in': 'fadeIn 0.3s ease-out' },
-                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+                    animation: { 'fade-in': 'fadeIn 0.4s ease-out forwards' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(15px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
     </script>
     
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
         .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
-        
-        /* Image Aspect Ratio */
-        .aspect-card { aspect-ratio: 4/3; }
-        
-        /* Smooth Image Loading */
-        img { transition: opacity 0.3s ease-in-out; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+        @media (max-width: 640px) { .masonry-item { margin-bottom: 1rem; } }
+        :root { --plyr-color-main: #3b82f6; --plyr-video-background: transparent; }
+        .plyr { border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 100%; }
+        .glass-dark { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-dark-bg dark:text-gray-100 transition-colors duration-200">
+<body class="bg-white text-gray-900 dark:bg-dark-bg dark:text-gray-100 transition-colors duration-300">
 
-    <nav class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-dark-bg/80 border-b border-gray-200 dark:border-dark-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                </div>
-                <div class="hidden sm:block">
-                    <h1 class="text-sm font-bold tracking-tight">Cloud Manager</h1>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{{.BucketName}}</p>
-                </div>
-            </div>
-
-            <div class="flex-1 max-w-md mx-4">
-                <div class="relative group">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-4 w-4 text-gray-400 group-focus-within:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+    <nav class="sticky top-0 z-40 bg-white/90 dark:bg-[#0f0f11]/90 backdrop-blur-2xl border-b border-gray-200/50 dark:border-white/5">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="h-20 flex items-center justify-between gap-4 sm:gap-8">
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                     </div>
-                    <input type="text" id="searchInput" placeholder="Search files..." class="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-dark-border rounded-xl leading-5 bg-gray-100 dark:bg-dark-card text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm">
+                    <div class="hidden md:block">
+                        <h1 class="text-base font-bold tracking-tight text-gray-900 dark:text-white">Cloud Manager</h1>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">{{.BucketName}}</p>
+                    </div>
+                </div>
+
+                <div class="flex-1 max-w-2xl">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <input type="text" id="searchInput" placeholder="Search your library..." class="block w-full pl-12 pr-4 py-3.5 border-none rounded-full bg-gray-100 dark:bg-dark-card text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-sm font-semibold shadow-inner">
+                    </div>
+                </div>
+
+                <div class="flex items-center shrink-0">
+                    <button id="themeToggle" class="p-3 rounded-full text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-border transition-all hover:scale-105 active:scale-95">
+                        <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        <svg id="moonIcon" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9 9 0 0012 21a9 9 0 008.354-5.646z" /></svg>
+                    </button>
                 </div>
             </div>
-
-            <button id="themeToggle" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-border transition-colors">
-                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                <svg id="moonIcon" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9 9 0 0012 21a9 9 0 008.354-5.646z" /></svg>
-            </button>
-        </div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-6 overflow-x-auto text-sm border-t border-gray-100 dark:border-dark-border">
-            <button class="filter-btn active py-3 border-b-2 border-transparent hover:text-brand-600 transition-colors whitespace-nowrap text-brand-600 border-brand-600 font-medium" data-filter="all">All Files</button>
-            <button class="filter-btn py-3 border-b-2 border-transparent hover:text-brand-600 transition-colors whitespace-nowrap text-gray-500 dark:text-gray-400" data-filter="image">Images</button>
-            <button class="filter-btn py-3 border-b-2 border-transparent hover:text-brand-600 transition-colors whitespace-nowrap text-gray-500 dark:text-gray-400" data-filter="video">Videos</button>
-            <button class="filter-btn py-3 border-b-2 border-transparent hover:text-brand-600 transition-colors whitespace-nowrap text-gray-500 dark:text-gray-400" data-filter="other">Documents</button>
+            
+            <div class="flex space-x-2 pb-4 pt-1 overflow-x-auto hide-scrollbar items-center">
+                <button class="filter-btn active px-5 py-2.5 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-bold transition-all text-sm whitespace-nowrap hover:scale-105 active:scale-95 shadow-md" data-filter="all">All Files</button>
+                <button class="filter-btn px-5 py-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-border font-bold transition-all text-sm whitespace-nowrap hover:scale-105 active:scale-95" data-filter="image">Images</button>
+                <button class="filter-btn px-5 py-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-border font-bold transition-all text-sm whitespace-nowrap hover:scale-105 active:scale-95" data-filter="video">Videos</button>
+                <button class="filter-btn px-5 py-2.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-card dark:text-gray-300 dark:hover:bg-dark-border font-bold transition-all text-sm whitespace-nowrap hover:scale-105 active:scale-95" data-filter="other">Documents</button>
+                
+                <div class="ml-auto flex items-center gap-2 pl-4">
+                    <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        <span id="fileCount">{{len .Files}}</span> items
+                    </span>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold">Your Library</h2>
-            <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-gray-300">
-                <span id="fileCount">{{len .Files}}</span> items
-            </span>
-        </div>
+        <div class="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-4 sm:gap-6">
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div class="masonry-item">
+                <form action="/upload" method="POST" enctype="multipart/form-data" class="group relative flex flex-col items-center justify-center border-[2.5px] border-dashed border-gray-300 dark:border-dark-border rounded-3xl hover:border-brand-500 hover:bg-brand-50 dark:hover:border-brand-500 dark:hover:bg-brand-900/10 transition-all cursor-pointer h-56 bg-gray-50/50 dark:bg-dark-card/50">
+                    <input type="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="this.form.submit()">
+                    <div class="w-12 h-12 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    </div>
+                    <span class="text-sm font-bold text-gray-600 dark:text-gray-300 group-hover:text-brand-600 dark:group-hover:text-brand-400">Upload File</span>
+                </form>
+            </div>
 
-            <form action="/upload" method="POST" enctype="multipart/form-data" class="group relative aspect-card flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-dark-border rounded-2xl hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-all cursor-pointer">
-                <input type="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="this.form.submit()">
-                <div class="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                </div>
-                <span class="text-xs font-medium text-brand-600 dark:text-brand-400">Upload New</span>
-            </form>
-
-            {{range .Files}}
-            <div class="file-item group relative flex flex-col bg-white dark:bg-dark-card border border-gray-100 dark:border-dark-border rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden animate-fade-in" 
+            {{range $index, $element := .Files}}
+            <div class="file-item masonry-item group cursor-pointer" 
+                 style="animation-delay: {{$index}}0ms;"
                  data-name="{{.Name}}" 
-                 data-type="{{.ContentType}}">
+                 data-displayname="{{.DisplayName}}"
+                 data-type="{{.ContentType}}"
+                 data-size="{{.Size}}"
+                 onclick="openViewer(this)">
                 
-                <a href="/viewer/{{.Name}}" class="block aspect-card bg-gray-50 dark:bg-[#121214] overflow-hidden relative">
-                    <div class="absolute inset-0 bg-gray-200 dark:bg-dark-border animate-pulse skeleton"></div>
+                <div class="relative rounded-3xl overflow-hidden bg-gray-100 dark:bg-[#18181b] min-h-[140px] flex items-center justify-center shadow-sm group-hover:shadow-xl transition-all duration-300">
+                    <div class="absolute inset-0 animate-pulse bg-gray-200 dark:bg-zinc-800 z-0 pointer-events-none"></div>
                     
                     <img src="{{.ThumbURL}}" 
-                         alt="{{.Name}}" 
+                         alt="{{.DisplayName}}" 
                          loading="lazy" 
-                         onload="this.previousElementSibling.style.display='none'"
-                         class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                         onload="this.style.opacity='1'; this.previousElementSibling.style.display='none';"
+                         onerror="this.onerror=null; this.previousElementSibling.style.display='none'; this.style.opacity='1'; this.classList.add('p-8'); this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCIgc3Ryb2tlPSIjOWNhM2FmIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMS41IiBkPSJNOSAxMmg2bS02IDRoNm0yIDVIN2EyIDIgMCAwMS0yLTJWNWEyIDIgMCAwMTItMmg1LjU4NmExIDEgMCAwMS43MDcuMjkzbDUuNDE0IDUuNDE0YTEgMSAwIDAxLjI5My43MDdWMTlhMiAyIDAgMDEtMiAyeiIvPjwvc3ZnPg==';"
+                         class="w-full h-auto block opacity-0 relative z-10 group-hover:scale-105 transition-all duration-700 ease-out object-cover">
                          
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                        <button onclick="event.preventDefault(); window.location.href='/viewer/{{.Name}}'" class="p-2 bg-white rounded-full text-black hover:bg-gray-200 transition" title="Download">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        </button>
+                    <div class="absolute top-0 right-0 left-0 p-3 z-20 flex justify-end opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 bg-gradient-to-b from-black/50 to-transparent">
+                        <button class="px-4 py-2 bg-brand-600 text-white font-bold text-sm rounded-full shadow-lg hover:bg-brand-700 hover:scale-105 transition-all pointer-events-auto">View</button>
                     </div>
-                </a>
 
-                <div class="p-3">
-                    <div class="flex items-start justify-between">
-                        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate w-full" title="{{.Name}}">{{.Name}}</h3>
+                    {{if or (hasPrefix .ContentType "video") (and (hasSuffix .Name ".m3u8") (not (hasSuffix .Name ".mp3.m3u8")) (not (hasSuffix .Name ".wav.m3u8"))) }}
+                    <div class="absolute z-20 bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] text-white font-bold tracking-wider flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-brand-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg> VIDEO
                     </div>
-                    <div class="mt-1 flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400 font-mono">
+                    {{else if or (hasPrefix .ContentType "audio") (and (hasSuffix .Name ".m3u8") (or (hasSuffix .Name ".mp3.m3u8") (hasSuffix .Name ".wav.m3u8"))) }}
+                    <div class="absolute z-20 bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] text-white font-bold tracking-wider flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19V6l12-2v11M5 19a2 2 0 100-4 2 2 0 000 4z" /></svg> AUDIO
+                    </div>
+                    {{end}}
+                </div>
+
+                <div class="mt-2.5 px-1.5">
+                    <h3 class="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate w-full" title="{{.DisplayName}}">{{.DisplayName}}</h3>
+                    <div class="mt-0.5 flex items-center justify-between text-[11px] font-semibold text-gray-500 dark:text-gray-400">
                         <span>{{.Size}}</span>
-                        <span>{{.Time}}</span>
+                        <span class="uppercase tracking-wide">{{.Time}}</span>
                     </div>
                 </div>
-                
-                {{if (hasPrefix .ContentType "video")}}
-                <div class="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/50 backdrop-blur-md text-[10px] text-white font-medium flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    VIDEO
-                </div>
-                {{end}}
             </div>
             {{end}}
 
         </div>
         
-        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-20 h-20 bg-gray-100 dark:bg-dark-card rounded-full flex items-center justify-center mb-4">
-                <svg class="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-24 text-center animate-fade-in">
+            <div class="w-24 h-24 bg-gray-100 dark:bg-dark-card rounded-full flex items-center justify-center mb-6 shadow-inner border border-gray-200 dark:border-dark-border">
+                <svg class="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">No matching files</h3>
-            <p class="text-sm text-gray-500">Try adjusting your search or filters.</p>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No files found</h3>
+            <p class="text-sm text-gray-500 font-medium">Try adjusting your search or switching categories.</p>
         </div>
 
     </main>
 
+    <!-- FULLSCREEN MODAL VIEWER -->
+    <div id="viewerModal" class="fixed inset-0 z-[100] hidden flex-col bg-black/95 backdrop-blur-3xl transition-opacity duration-300 opacity-0">
+        <nav class="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start pointer-events-none z-50">
+            <div class="glass-dark px-2 py-2 pr-6 rounded-full flex items-center gap-4 pointer-events-auto max-w-[70vw] shadow-2xl">
+                <button onclick="closeViewer()" class="p-3 bg-white text-black rounded-full hover:bg-gray-200 hover:scale-105 active:scale-95 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                </button>
+                <div class="overflow-hidden text-white">
+                    <h1 id="modalTitle" class="text-sm font-bold tracking-wide truncate">Filename</h1>
+                    <p id="modalSize" class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Size</p>
+                </div>
+            </div>
+            <div class="flex gap-3 pointer-events-auto" id="modalActions">
+                <a id="modalDownload" href="#" class="glass-dark p-3.5 rounded-full text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all" title="Download">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                </a>
+            </div>
+        </nav>
+
+        <button onclick="prevFile()" id="prevBtn" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-50 glass-dark p-4 rounded-full text-white hover:bg-white/20 hover:scale-110 active:scale-95 transition-all shadow-2xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button onclick="nextFile()" id="nextBtn" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-50 glass-dark p-4 rounded-full text-white hover:bg-white/20 hover:scale-110 active:scale-95 transition-all shadow-2xl">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <div id="mediaContainer" class="flex-1 w-full h-full flex items-center justify-center p-4 sm:p-20 overflow-hidden relative z-40"></div>
+    </div>
+
     <script>
-        // --- 1. Dark Mode Logic ---
         const html = document.documentElement;
         const toggle = document.getElementById('themeToggle');
         const sun = document.getElementById('sunIcon');
         const moon = document.getElementById('moonIcon');
 
         function setTheme(isDark) {
-            if(isDark) {
-                html.classList.add('dark');
-                sun.classList.remove('hidden');
-                moon.classList.add('hidden');
-                localStorage.theme = 'dark';
-            } else {
-                html.classList.remove('dark');
-                sun.classList.add('hidden');
-                moon.classList.remove('hidden');
-                localStorage.theme = 'light';
-            }
+            if(isDark) { html.classList.add('dark'); sun.classList.remove('hidden'); moon.classList.add('hidden'); localStorage.theme = 'dark'; } 
+            else { html.classList.remove('dark'); sun.classList.add('hidden'); moon.classList.remove('hidden'); localStorage.theme = 'light'; }
         }
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { setTheme(true); } else { setTheme(false); }
+        toggle.addEventListener('click', () => setTheme(!html.classList.contains('dark')));
 
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            setTheme(true);
-        } else {
-            setTheme(false);
-        }
-
-        toggle.addEventListener('click', () => {
-            setTheme(!html.classList.contains('dark'));
-        });
-
-        // --- 2. Filter & Search Logic ---
         const searchInput = document.getElementById('searchInput');
         const fileItems = document.querySelectorAll('.file-item');
         const filterBtns = document.querySelectorAll('.filter-btn');
@@ -194,58 +218,233 @@
 
         let currentFilter = 'all';
         let currentSearch = '';
+        let visibleItemsArray = Array.from(fileItems);
+        const activeClasses = ['bg-gray-900', 'text-white', 'dark:bg-white', 'dark:text-gray-900', 'shadow-md'];
+        const inactiveClasses = ['bg-gray-100', 'text-gray-700', 'hover:bg-gray-200', 'dark:bg-dark-card', 'dark:text-gray-300', 'dark:hover:bg-dark-border'];
 
         function updateView() {
-            let visible = 0;
-            
+            let visibleCount = 0;
+            visibleItemsArray = [];
             fileItems.forEach(item => {
                 const name = item.dataset.name.toLowerCase();
+                const display = item.dataset.displayname.toLowerCase();
                 const type = item.dataset.type;
-                
-                // Filter Check
                 let passFilter = false;
+                
+                let isVid = type.startsWith('video/') || (name.endsWith('.m3u8') && !name.includes('.mp3') && !name.includes('.wav') && !name.includes('.m4a'));
+                let isAud = type.startsWith('audio/') || (name.endsWith('.m3u8') && (name.includes('.mp3') || name.includes('.wav') || name.includes('.m4a')));
+
                 if (currentFilter === 'all') passFilter = true;
                 else if (currentFilter === 'image') passFilter = type.startsWith('image/');
-                else if (currentFilter === 'video') passFilter = type.startsWith('video/');
-                else passFilter = !type.startsWith('image/') && !type.startsWith('video/');
+                else if (currentFilter === 'video') passFilter = isVid;
+                else passFilter = !type.startsWith('image/') && !isVid && !isAud;
 
-                // Search Check
-                const passSearch = name.includes(currentSearch);
-
-                if (passFilter && passSearch) {
-                    item.style.display = 'flex'; // Restore flex layout
-                    visible++;
-                } else {
-                    item.style.display = 'none';
-                }
+                if (passFilter && display.includes(currentSearch)) {
+                    item.classList.remove('hidden');
+                    visibleItemsArray.push(item);
+                    visibleCount++;
+                } else { item.classList.add('hidden'); }
             });
 
-            // Update Counts and Empty State
-            countSpan.innerText = visible;
-            emptyState.classList.toggle('hidden', visible > 0);
+            countSpan.innerText = visibleCount;
+            emptyState.classList.toggle('hidden', visibleCount > 0);
+            updateNavArrows();
         }
 
-        // Event Listeners
-        searchInput.addEventListener('input', (e) => {
-            currentSearch = e.target.value.toLowerCase();
-            updateView();
-        });
-
+        searchInput.addEventListener('input', (e) => { currentSearch = e.target.value.toLowerCase(); updateView(); });
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Update Active Styles
-                filterBtns.forEach(b => {
-                    b.classList.remove('text-brand-600', 'border-brand-600', 'font-medium', 'active');
-                    b.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent');
-                });
-                btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent');
-                btn.classList.add('text-brand-600', 'border-brand-600', 'font-medium', 'active');
-
-                currentFilter = btn.dataset.filter;
-                updateView();
+                filterBtns.forEach(b => { b.classList.remove('active', ...activeClasses); b.classList.add(...inactiveClasses); });
+                btn.classList.remove(...inactiveClasses); btn.classList.add('active', ...activeClasses);
+                currentFilter = btn.dataset.filter; updateView();
             });
+        });
+
+        // --- HLS & PLYR INTEGRATION ---
+        let currentFileNode = null;
+        let playerInstance = null;
+        let hlsInstance = null;
+
+        function openViewer(element) {
+            currentFileNode = element;
+            const name = element.dataset.name;
+            const displayName = element.dataset.displayname;
+            const type = element.dataset.type;
+            const size = element.dataset.size;
+            
+            const pathName = name.split('/').map(encodeURIComponent).join('/');
+            const rawUrl = `/view/${pathName}?raw=true`;
+            
+            document.getElementById('modalTitle').textContent = displayName;
+            document.getElementById('modalSize').textContent = size;
+            document.getElementById('modalDownload').href = `/download/${pathName}`;
+            
+            const isUnoptimizedMedia = (type.startsWith('video/') || type.startsWith('audio/')) && !name.endsWith('.m3u8');
+            const isLargeSize = size.includes('GB') || (size.includes('MB') && parseFloat(size) > 4.0);
+
+            const modalActions = document.getElementById('modalActions');
+            modalActions.innerHTML = `
+                <a id="modalDownload" href="/download/${pathName}" class="glass-dark p-3.5 rounded-full text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all" title="Download">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                </a>`;
+            
+            if (isUnoptimizedMedia && isLargeSize) {
+                modalActions.insertAdjacentHTML('afterbegin', `
+                    <button id="optimizeBtn" onclick="convertCurrentFile()" class="glass-dark px-5 py-2 rounded-full text-white font-bold hover:bg-brand-600 hover:border-brand-500 hover:scale-105 active:scale-95 transition-all text-xs flex items-center gap-2 shadow-lg" title="Convert to HLS Streaming">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Optimize Stream
+                    </button>
+                `);
+            }
+            
+            const container = document.getElementById('mediaContainer');
+            container.innerHTML = ''; 
+            
+            if(playerInstance) { playerInstance.destroy(); playerInstance = null; }
+            if(hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+
+            if (name.toLowerCase().endsWith('.m3u8')) {
+                const isAudioHls = name.includes('.mp3.m3u8') || name.includes('.wav.m3u8') || name.includes('.aac.m3u8') || name.includes('.m4a.m3u8');
+                
+                if (isAudioHls) {
+                    container.innerHTML = `
+                    <div class="w-full max-w-md glass-dark p-8 rounded-[30px] shadow-2xl flex flex-col items-center">
+                        <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-gray-700 to-gray-900 flex items-center justify-center mb-8 shadow-inner border border-white/10">
+                            <svg class="w-12 h-12 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v11M5 19a2 2 0 100-4 2 2 0 000 4z" /></svg>
+                        </div>
+                        <div class="w-full"><video id="plyr-player" controls autoplay></video></div>
+                    </div>`;
+                } else {
+                    container.innerHTML = `<div class="w-full max-w-5xl"><video id="plyr-player" playsinline controls autoplay></video></div>`;
+                }
+
+                const video = document.getElementById('plyr-player');
+                
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls({ maxMaxBufferLength: 30 });
+                    hlsInstance.loadSource(rawUrl);
+                    hlsInstance.attachMedia(video);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
+                    playerInstance = new Plyr(video, { controls: isAudioHls ? ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'] : ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'] });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = rawUrl;
+                    video.addEventListener('loadedmetadata', () => video.play());
+                    playerInstance = new Plyr(video);
+                }
+            }
+            else if (type.startsWith('image/')) {
+                container.innerHTML = `<img src="${rawUrl}" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')" alt="${displayName}">`;
+            } 
+            else if (type.startsWith('video/')) {
+                container.innerHTML = `<div class="w-full max-w-5xl"><video id="plyr-player" playsinline controls autoplay preload="metadata"><source src="${rawUrl}" type="${type}" /></video></div>`;
+                playerInstance = new Plyr('#plyr-player', { controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'] });
+            } 
+            else if (type.startsWith('audio/')) {
+                container.innerHTML = `
+                <div class="w-full max-w-md glass-dark p-8 rounded-[30px] shadow-2xl flex flex-col items-center">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-gray-700 to-gray-900 flex items-center justify-center mb-8 shadow-inner border border-white/10">
+                        <svg class="w-12 h-12 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v11M5 19a2 2 0 100-4 2 2 0 000 4z" /></svg>
+                    </div>
+                    <div class="w-full"><audio id="plyr-player" controls autoplay preload="metadata"><source src="${rawUrl}" type="${type}" /></audio></div>
+                </div>`;
+                playerInstance = new Plyr('#plyr-player', { controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'] });
+            } 
+            else if (name.toLowerCase().endsWith('.pdf')) {
+                container.innerHTML = `<object data="${rawUrl}" type="application/pdf" class="w-full h-[85vh] rounded-2xl bg-white shadow-2xl"></object>`;
+            } 
+            else {
+                container.innerHTML = `
+                <div class="glass-dark p-12 rounded-3xl text-center max-w-sm shadow-2xl text-white">
+                    <svg class="w-16 h-16 text-white/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <h3 class="text-lg font-bold mb-6 break-all">${displayName}</h3>
+                    <a href="/download/${pathName}" class="block w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold transition">Download File</a>
+                </div>`;
+            }
+
+            updateNavArrows();
+            const modal = document.getElementById('viewerModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.body.style.overflow = 'hidden'; }, 10);
+        }
+
+        async function convertCurrentFile() {
+            if(!currentFileNode) return;
+            const name = currentFileNode.dataset.name;
+            
+            if(playerInstance) { playerInstance.destroy(); playerInstance = null; }
+            const container = document.getElementById('mediaContainer');
+            
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center text-white text-center animate-fade-in glass-dark p-12 rounded-3xl border border-white/10 shadow-2xl">
+                    <svg class="w-16 h-16 mb-6 animate-spin text-brand-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <h2 class="text-xl font-bold mb-2">Optimizing Media...</h2>
+                    <p class="text-sm text-gray-400 max-w-xs">We are transcoding this file to HLS chunks for instant streaming. This may take a few minutes depending on the size.</p>
+                </div>
+            `;
+            
+            const btn = document.getElementById('optimizeBtn');
+            if(btn) btn.style.display = 'none';
+
+            try {
+                const res = await fetch('/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: name })
+                });
+                
+                if(res.ok) {
+                    window.location.reload();
+                } else {
+                    alert("Conversion failed. Please check server logs.");
+                    closeViewer();
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+                closeViewer();
+            }
+        }
+
+        function closeViewer() {
+            const modal = document.getElementById('viewerModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden'); document.body.style.overflow = '';
+                if(playerInstance) { playerInstance.destroy(); playerInstance = null; }
+                if(hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+                document.getElementById('mediaContainer').innerHTML = '';
+            }, 300);
+            currentFileNode = null;
+        }
+
+        function updateNavArrows() {
+            if (!currentFileNode) return;
+            const index = visibleItemsArray.indexOf(currentFileNode);
+            const prevBtn = document.getElementById('prevBtn'); const nextBtn = document.getElementById('nextBtn');
+            if(index <= 0) { prevBtn.classList.add('opacity-50', 'pointer-events-none'); } else { prevBtn.classList.remove('opacity-50', 'pointer-events-none'); }
+            if(index >= visibleItemsArray.length - 1 || index === -1) { nextBtn.classList.add('opacity-50', 'pointer-events-none'); } else { nextBtn.classList.remove('opacity-50', 'pointer-events-none'); }
+        }
+
+        function nextFile() {
+            const index = visibleItemsArray.indexOf(currentFileNode);
+            if (index > -1 && index < visibleItemsArray.length - 1) { openViewer(visibleItemsArray[index + 1]); }
+        }
+        function prevFile() {
+            const index = visibleItemsArray.indexOf(currentFileNode);
+            if (index > 0) { openViewer(visibleItemsArray[index - 1]); }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('viewerModal');
+            if (!modal.classList.contains('hidden')) {
+                if (e.key === 'Escape') closeViewer();
+                if (e.key === 'ArrowRight') nextFile();
+                if (e.key === 'ArrowLeft') prevFile();
+            }
         });
 
     </script>
 </body>
 </html>
+
+
+{{end}}
